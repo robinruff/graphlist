@@ -3,6 +3,7 @@ from typing import List
 from functools import cached_property
 from networkx import MultiDiGraph
 from typing import Dict
+import logging
 
 
 class GraphList:
@@ -93,17 +94,21 @@ class GraphList:
         edge_indices = np.zeros(shape=(num_edges.sum(), 2), dtype=int)
 
         for node_attr in node_attribute_names:
-            peek = np.array(next(iter(graphs[0].nodes(data=node_attr)))[1])
+            if node_starts[-1] == 0:
+                logging.warn("No nodes in all graphs.")
+                break
+            peek = np.array(next(
+                iter(graphs[np.argwhere(num_nodes > 0)[0, 0]].nodes(data=node_attr)))[1])
             shape = (num_nodes.sum(),) + peek.shape
             dtype = peek.dtype
             node_attributes[node_attr] = np.zeros(shape=shape, dtype=dtype)
 
         for edge_attr in edge_attribute_names:
-            peek = np.array(
-                next(
-                    iter(graphs[np.argwhere(num_edges > 0)[0, 0]].edges(data=edge_attr))
-                )[2]
-            )
+            if edge_starts[-1] == 0:
+                logging.warn("No edges in all graphs.")
+                break
+            peek = np.array(next(
+                iter(graphs[np.argwhere(num_edges > 0)[0, 0]].edges(data=edge_attr)))[2])
             shape = (num_edges.sum(),) + peek.shape
             dtype = peek.dtype
             edge_attributes[edge_attr] = np.zeros(shape=shape, dtype=dtype)
